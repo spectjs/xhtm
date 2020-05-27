@@ -1,5 +1,129 @@
 import t from 'tst'
-import { h, html } from './index.js'
+import { html, h } from './index.js'
+
+
+t('base case', t => {
+	t.is(html` foo <a b >c${'d'}<e f=g/>h </a>`, [
+		' foo ', { tag: 'a', props: { b: true }, children: ['c', 'd', { tag: 'e', props: { f: 'g' }, children: [] }, 'h '] }
+	])
+	t.end()
+})
+
+t('plain text', t => {
+	t.is(html`a`, `a`)
+	t.is(html`a${'b'}c`, ['a', 'b', 'c'])
+	t.is(html`a${1}b${2}c`, ['a', 1, 'b', 2, 'c'])
+	t.is(html`foo${''}bar${''}`, ['foo', '', 'bar', ''])
+	t.is(html`${'foo'}${'bar'}`, ['foo', 'bar'])
+	t.is(html`${''}${''}`, ['', ''])
+	t.end()
+})
+t('tag cases', t => {
+	// special case: both self-closing empty tag and ending tag
+	// t.is(html`</>`, { tag: '', props: null, children: []})
+
+	t.is(html`< />`, { tag: '', props: null, children: [] }, `< />`)
+	t.is(html`<></>`, { tag: '', props: null, children: [] }, `<></>`)
+	t.is(html`<a></>`, { tag: 'a', props: null, children: [] }, `<a></>`)
+	t.is(html`<a></a>`, { tag: 'a', props: null, children: [] }, `<a></a>`)
+	t.is(html`<abc/>`, { tag: 'abc', props: null, children: [] }, `<abc/>`)
+	t.is(html`<abc />`, { tag: 'abc', props: null, children: [] }, `<abc />`)
+	t.is(html`<abc  />`, { tag: 'abc', props: null, children: [] }, `<abc  />`)
+	t.is(html`<abc></>`, { tag: 'abc', props: null, children: [] }, `<abc></>`)
+	t.is(html`<abc></abc>`, { tag: 'abc', props: null, children: [] }, `<abc></abc>`)
+	t.is(html`<${'abc'} />`, { tag: 'abc', props: null, children: [] }, `<${'abc'} />`)
+	t.is(html`<abc d/>`, { tag: 'abc', props: { d: true }, children: [] }, `<abc d/>`)
+	t.is(html`<abc d />`, { tag: 'abc', props: { d: true }, children: [] }, `<abc d />`)
+	t.is(html`<abc d  />`, { tag: 'abc', props: { d: true }, children: [] }, `<abc d  />`)
+	t.is(html`<abc ${'d'}/>`, { tag: 'abc', props: { d: true }, children: [] }, `<abc ${'d'}/>`)
+	t.is(html`<abc ${'d'} />`, { tag: 'abc', props: { d: true }, children: [] }, `<abc ${'d'} />`)
+	t.is(html`<abc  ${'d'}  />`, { tag: 'abc', props: { d: true }, children: [] }, `<abc  ${'d'}  />`)
+	t.is(html`<abc   ${'d'}   />`, { tag: 'abc', props: { d: true }, children: [] }, `<abc   ${'d'}   />`)
+	t.is(html`<abc d=e/>`, { tag: 'abc', props: { d: 'e' }, children: [] }, `<abc d=e/>`)
+	t.is(html`<abc d=e />`, { tag: 'abc', props: { d: 'e' }, children: [] }, `<abc d=e />`)
+	t.is(html`<abc d=e  />`, { tag: 'abc', props: { d: 'e' }, children: [] }, `<abc d=e  />`)
+	t.is(html`<abc d=e ></>`, { tag: 'abc', props: { d: 'e' }, children: [] }, `<abc d=e ></>`)
+	t.is(html`<abc d=${'e'}/>`, { tag: 'abc', props: { d: 'e' }, children: [] }, `<abc d=${'e'}/>`)
+	t.is(html`<abc d=${'e'} />`, { tag: 'abc', props: { d: 'e' }, children: [] }, `<abc d=${'e'} />`)
+	t.is(html`<abc d=${'e'}  />`, { tag: 'abc', props: { d: 'e' }, children: [] }, `<abc d=${'e'}  />`)
+	t.is(html`<abc d="e"/>`, { tag: 'abc', props: { d: 'e' }, children: [] }, `<abc d="e"/>`)
+	t.is(html`<abc d="e" />`, { tag: 'abc', props: { d: 'e' }, children: [] }, `<abc d="e" />`)
+	t.is(html`<abc d="e f"/>`, { tag: 'abc', props: { d: 'e f' }, children: [] }, `<abc d="e f"/>`)
+	t.is(html`<abc d="e f" />`, { tag: 'abc', props: { d: 'e f' }, children: [] }, `<abc d="e f" />`)
+	t.is(html`<abc d="${'e'} f" />`, { tag: 'abc', props: { d: 'e f' }, children: [] }, `<abc d="${'e'} f" />`)
+	t.is(html`<abc d=${'e'}${'f'} />`, { tag: 'abc', props: { d: 'ef' }, children: [] }, `<abc d=${'e'}${'f'} />`)
+	t.is(html`<abc d=e${'f'} />`, { tag: 'abc', props: { d: 'ef' }, children: [] }, `<abc d=e${'f'} />`)
+	t.end()
+})
+
+t.todo('calculated tag cases', t => {
+	t.is(html`<a${'bc'} />`, { tag: 'abc', props: null, children: [] })
+	t.is(html`<${'ab'}c />`, { tag: 'abc', props: null, children: [] })
+	t.is(html`<${'a'}${'b'}${'c'} />`, { tag: 'abc', props: null, children: [] })
+})
+
+t('attribute cases', t => {
+	t.is(html`<a b />`, { tag: 'a', props: {b: true}, children: [] })
+	t.is(html`<a b="" />`, { tag: 'a', props: {b: ''}, children: [] })
+	t.is(html`<a b=c />`, { tag: 'a', props: {b: 'c'}, children: [] })
+	t.is(html`<a ${'b'} />`, { tag: 'a', props: {b: true}, children: [] })
+	t.is(html`<a ${'b'}=c />`, { tag: 'a', props: {b: 'c'}, children: [] })
+	t.is(html`<a ${'b'}=${'c'} />`, { tag: 'a', props: {b: 'c'}, children: [] })
+})
+
+t('unclosed value attr case', t => {
+	t.is(html`<a b><c d/></a>`, h('a',{b:true}, h('c', {d:true})))
+	t.is(html`<a b=1><c d/></a>`, h('a',{b:'1'}, h('c', {d:true})))
+	t.is(html`<a b><c d=1/></a>`, h('a',{b:true}, h('c', {d:'1'})))
+	t.is(html`<a b/><c d=1/>`, [h('a',{b:true}), h('c', {d:'1'})])
+	t.is(html`<a b/><c d/>`, [h('a',{b:true}), h('c', {d:true})])
+})
+
+t('quoted cases', t => {
+	t.is(html`<abc d="e f" g=' h ' i=" > j /> k " />`, { tag: 'abc', props: { d: 'e f', g: ' h ', i: ' > j /> k ' }, children: [] })
+	t.is(html`<abc>"def"</>`, { tag: 'abc', props: null, children: ["\"def\""] })
+	t.end()
+})
+
+t.todo('malformed html', t => {
+	t.throws(() => html`<a b c`)
+	t.throws(() => html`<a><`)
+	t.throws(() => html`<a><b/>`)
+	t.end()
+})
+
+t('ignore null values', t => {
+	t.is(
+		html`<div str="${false} ${null} ${undefined}" />`,
+		{ tag: 'div', props: { str: "false  " }, children: [] }
+	);
+
+	t.end()
+})
+
+t('after tags', t => {
+	t.is(html`<x/> 1`, [{tag:'x', props: null, children: []}, ' 1'])
+	t.is(html`<x/>${1}`, [{tag:'x', props: null, children: []}, 1])
+	t.is(html`1<x/>`, ['1', {tag:'x', props: null, children: []}])
+	t.is(html`${1}<x/>`, [1, {tag:'x', props: null, children: []}])
+	t.is(html`${1}<x/>${1}`, [1, {tag:'x', props: null, children: []}, 1])
+})
+
+
+t.skip('indentation & spaces', t => {
+	t.is(html`
+			<a>
+				before
+				${'foo'}
+				<b />
+				${'bar'}
+				after
+			</a>
+		`, h('a', null, 'before', 'foo', h('b', null), 'bar', 'after'));
+	t.end()
+})
+
+
 
 t('html: self-closing tags', t => {
   t.is(html`<input>`, { tag: 'input', props: null, children: [] })
@@ -7,7 +131,7 @@ t('html: self-closing tags', t => {
 })
 
 
-t('optional closing tags', t => {
+t.todo('optional closing tags', t => {
 	t.is(
 		html`<table><tr><td>1<tr><td>2</table>`,
 		{tag: 'table', props: null, children: [
@@ -27,7 +151,7 @@ t('optional closing tags', t => {
 	)
 })
 
-t('optional closing tags 2', t => {
+t.todo('optional closing tags 2', t => {
 	t.is(html`
 	<table>
 	<caption>37547 TEE Electric Powered Rail Car Train Functions (Abbreviated)
@@ -78,7 +202,7 @@ t('optional closing tags 2', t => {
 	]})
 })
 
-t('optional closing tags normal', t => {
+t.todo('optional closing tags normal', t => {
 	t.is(html`
 	<table>
 	<caption>37547 TEE Electric Powered Rail Car Train Functions (Abbreviated) </caption>
@@ -131,7 +255,7 @@ t('optional closing tags normal', t => {
 	]})
 })
 
-t('optional/self-closing readme', t => {
+t.todo('optional/self-closing readme', t => {
   t.is(html`
     <h1>Hello World!</h1>
     <p>Some paragraph<br>
@@ -147,10 +271,13 @@ t('html: tr case', t => {
 	t.is(html`<tr colspan=2/>`, {tag: 'tr', props: {colspan: '2'}, children: []})
 })
 
-t('html: directives', t => {
-  t.is(html`<?xml version="1.0" encoding="UTF-8" ?>`, {tag:'?xml', props:{version:'1.0', encoding:'UTF-8', '?': true}, children:[]})
-  t.is(html`<!doctype html>`, {tag: '!doctype', props:{html: true}, children:[]})
-  t.is(html`<!DOCTYPE html>`, {tag: '!DOCTYPE', props:{html: true}, children:[]})
+t.todo('html: directives', t => {
+  // t.is(html`<?xml version="1.0" encoding="UTF-8" ?>`, {tag:'?xml', props:{version:'1.0', encoding:'UTF-8', '?': true}, children:[]})
+  t.is(html`<?xml version="1.0" encoding="UTF-8" ?>`, undefined)
+  // t.is(html`<!doctype html>`, {tag: '!doctype', props:{html: true}, children:[]})
+  t.is(html`<!doctype html>`, undefined)
+  // t.is(html`<!DOCTYPE html>`, {tag: '!DOCTYPE', props:{html: true}, children:[]})
+  t.is(html`<!DOCTYPE html>`, undefined)
   // t.is(html`<!ELEMENT html (head, body)>`, {tag:, props:{}, children:[]})
   t.is(html`<? header("Content-Type: text/html; charset= UTF-8"); ?>`, {tag: '?', props:{'header("Content-Type: text/html; charset= UTF-8");': true, '?': true}, children: []})
   t.is(html`<![CDATA[<sender>]]>`, undefined)
